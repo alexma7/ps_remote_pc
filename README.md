@@ -27,8 +27,17 @@
       - steam
       - epic
       - chrome
-  - если параметр = 0, то устанавливаем громкость из par_val, если = 1, то текущая громкость + par_val
+  - если = 0, то выключить громкость
+  - если = 1, то включить громкость
+  - если = 2, то устанавливаем громкость из par_val, 
+  - если = 3, то текущая громкость + par_val
 
 
 Создаем ярлык для запуска скрипта с параметрами, через пробел.
 C:\other\GIT\ps_remote_pc\ps_remote_pc.exe win_on_monitor
+
+
+Установка компонента [AudioDeviceCmdlets](https://github.com/frgnca/AudioDeviceCmdlets) в powershell для работы функции set_vol. Запускаем powershell от админа и вводим команду:
+```
+Install-Module -Name AudioDeviceCmdlets
+```

@@ -4,6 +4,11 @@ param ($type, $par_val, $par_check)
 #"par_val - " + $par_val 
 #"par_check - " + $par_check 
 
+if (  $null -eq $par_check)
+{
+    $par_check = 0
+}
+
 # Переменные для работы
 $path_nircmd = "C:\Program Files\NirCmd\nircmd.exe"
 $path_mon = "C:\Program Files\multimonitortool\MultiMonitorTool.exe"
@@ -84,18 +89,29 @@ elseif ($type -eq "win_on_tv")
     }
     elseif ($par_check -eq "chrome")    
     {
-        & "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+        & "C:\Program Files\Google\Chrome\Application\chrome.exe"
     }
 }
 elseif ($type -eq "set_volume")
 {
-    [Environment]::SetEnvironmentVariable("WHERE_PICTURE", $type, 'User')
-    # если параметр = 0, то устанавливаем громкость из par_val, если = 1, то текущая громкость + par_val
+    #[Environment]::SetEnvironmentVariable("WHERE_PICTURE", $type, 'User')
+    # выключить громкость
     if ($par_check -eq 0)
+    {
+        Set-AudioDevice -PlaybackMute 1
+    }
+    # вкл/откл громкость
+    elseif ($par_check -eq 1)
+    {
+        Set-AudioDevice -PlaybackMute 0
+    }
+    #устанавливаем громкость из par_val
+    elseif ($par_check -eq 2)
     {
         Set-AudioDevice -PlaybackVolume ($par_val)
     }
-    elseif ($par_check -eq 1)
+    #текущая громкость + par_val
+    elseif ($par_check -eq 3)
     {
         $vol_now = (get-AudioDevice -PlaybackVolume).split(',')[0].split('%')[0]
         $vol_now = [int]::Parse($vol_now)

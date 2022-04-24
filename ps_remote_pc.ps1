@@ -9,17 +9,33 @@ if (  $null -eq $par_check)
     $par_check = 0
 }
 
-# Переменные для работы
-$path_nircmd = "C:\Program Files\NirCmd\nircmd.exe"
-$path_mon = "C:\Program Files\multimonitortool\MultiMonitorTool.exe"
+# Получим путь до файла, из exe файла не работает $PSScriptRoot
+$path_to_script = 
+	if (-not $PSScriptRoot) 
+	{  
+		Split-Path -Parent (Convert-Path ([environment]::GetCommandLineArgs()[0])) 
+	} 
+	else 
+	{
+		$PSScriptRoot 
+	}
+
+# Получаем данные из JSON
+$json = Get-Content ( $path_to_script + '\ps_remote_pc.json')  
+$json = $json -replace '(?m)(?<=^([^"]|"[^"]*")*)//.*' -replace '(?ms)/\*.*?\*/' 
+$json = $json | Out-String | ConvertFrom-Json
+
+# Переменные для работы  $json.path_to_logs
+$path_nircmd = $json.path_nircmd
+$path_mon = $json.path_mon
 $name_pc_speaker = "Динамики"
 $name_receiver_speaker = "DENON-AVAMP"
 $close_process = ("*chrome*", "Teams")
 
 # id мониторов
-$monitor_left_id = "PCI\VEN_10DE&DEV_1C03&SUBSYS_32831462&REV_A1"
-$monitor_right_id = "PCI\VEN_10DE&DEV_1C03&SUBSYS_32831462&REV_A1"
-$tv_id = "PCI\VEN_10DE&DEV_1C03&SUBSYS_32831462&REV_A1"
+$monitor_left_id = $json.monitor_left_id
+$monitor_right_id = $json.monitor_right_id
+$tv_id = $json.tv_id
 #   
 
 $full_path = if (-not $PSScriptRoot) { [Environment]::GetCommandLineArgs()[0] } else { $PSScriptRoot + "\"+ $MyInvocation.MyCommand.Name}
@@ -154,6 +170,12 @@ elseif ($type -eq "off_monitors3")
     Start-Sleep -Milliseconds 500
     & $path_mon /TurnOff $monitor_right_id
     New-Item -Name 'file1.txt' -Path 'D:\' 
+}
+
+# Удаляем из папки самый первый файл с сортировкой по имени
+elseif ($type -eq "delete_file_dlna")
+{
+    gci  $json.path_hdd_dlna  | sort name | select -first 1 | Remove-Item
 }
 
 

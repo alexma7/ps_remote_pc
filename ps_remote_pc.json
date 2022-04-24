@@ -1,0 +1,9 @@
+{
+    "path_hdd_dlna": "\\\\192.168.1.100\\g\\Films\\FT",
+    "path_nircmd": "C:\\Program Files\\NirCmd\\nircmd.exe",
+    "path_mon": "C:\\Program Files\\multimonitortool\\MultiMonitorTool.exe",
+
+    "monitor_left_id": "PCI\\VEN_10DE&DEV_1C03&SUBSYS_32831462&REV_A1",
+    "monitor_right_id": "PCI\\VEN_10DE&DEV_1C03&SUBSYS_32831462&REV_A1",
+    "tv_id": "PCI\\VEN_10DE&DEV_1C03&SUBSYS_32831462&REV_A1"
+}

@@ -1,0 +1,1 @@
+﻿C:\other\GIT\ps_remote_pc\ps_remote_pc.ps1 delete_file_dlna

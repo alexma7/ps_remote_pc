@@ -1,13 +1,25 @@
 param ($type, $par_val, $par_check)
 
+
 #"type - " + $type 
 #"par_val - " + $par_val 
 #"par_check - " + $par_check 
 
+# проверяем на 1, если больше , то умножаем
 if (  $null -eq $par_check)
 {
     $par_check = 0
 }
+
+# из HA приходит число от 0-1, флоат, надо его преобразовать и округлить
+if ( $par_val -lt 1.0)
+{
+    $par_val = [math]::Round([float]$par_val * 100, 0)
+}
+
+# запишем параметры в журнал 
+$date_begin = Get-Date -Format "dd/MM/yyyy HH:mm"
+$date_begin + ": type=" + $type + " par_val=" + $par_val + " par_check=" + $par_check  | Out-File C:\other\GIT\ps_remote_pc\logs.txt -append
 
 # Получим путь до файла, из exe файла не работает $PSScriptRoot
 $path_to_script = 
@@ -19,7 +31,7 @@ $path_to_script =
 	{
 		$PSScriptRoot 
 	}
-
+$path_to_script
 # Получаем данные из JSON
 $json = Get-Content ( $path_to_script + '\ps_remote_pc.json')  
 $json = $json -replace '(?m)(?<=^([^"]|"[^"]*")*)//.*' -replace '(?ms)/\*.*?\*/' 
@@ -28,9 +40,12 @@ $json = $json | Out-String | ConvertFrom-Json
 # Переменные для работы  $json.path_to_logs
 $path_nircmd = $json.path_nircmd
 $path_mon = $json.path_mon
+$close_chrome = $json.close_chrome
+
 $name_pc_speaker = "Динамики"
 $name_receiver_speaker = "DENON-AVAMP"
 $close_process = ("*chrome*", "Teams")
+
 
 # id мониторов
 $monitor_left_id = $json.monitor_left_id
@@ -84,7 +99,7 @@ elseif ($type -eq "win_on_tv")
     & $path_nircmd setdefaultsounddevice $name_receiver_speaker 2
 
     # Если параметр не равен "chrome", то останавливаем все процессы из массива
-    if ($par_check -ne "chrome")
+    if (($par_check -ne "chrome") -and ($close_chrome -ne "1"))
     {
         $close_process | ForEach-Object {
             if(Get-Process -processName  $_ -ErrorAction SilentlyContinue)
@@ -133,6 +148,10 @@ elseif ($type -eq "set_volume")
         $vol_now = [int]::Parse($vol_now)
         Set-AudioDevice -PlaybackVolume ($vol_now + $par_val)
     }
+    elseif ($par_check -eq 4)
+    {
+        Set-AudioDevice -PlaybackMuteToggle 
+    }
 }
 # выключаем мониторы
 elseif ($type -eq "off_monitors1")
@@ -175,8 +194,9 @@ elseif ($type -eq "off_monitors3")
 # Удаляем из папки самый первый файл с сортировкой по имени
 elseif ($type -eq "delete_file_dlna")
 {
-    gci  $json.path_hdd_dlna  | sort name | select -first 1 | Remove-Item
+    Get-ChildItem  $json.path_hdd_dlna  | Sort-Object name | Select-Object -first 1 | Remove-Item
 }
+
 
 
 

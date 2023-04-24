@@ -40,17 +40,17 @@ $json = $json | Out-String | ConvertFrom-Json
 # Переменные для работы  $json.path_to_logs
 $path_nircmd = $json.path_nircmd
 $path_mon = $json.path_mon
-$close_chrome = $json.close_chrome
+# $close_chrome = $json.close_chrome
 
-$name_pc_speaker = "Динамики"
+$name_pc_speaker = "Speakers"  # Если винда русская, то нужно писать Динамики
 $name_receiver_speaker = "DENON-AVAMP"
-$close_process = ("*chrome*", "Teams")
+# $close_process = ("*chrome*", "Teams")
 
 
 # id мониторов
-$monitor_left_id = $json.monitor_left_id
-$monitor_right_id = $json.monitor_right_id
-$tv_id = $json.tv_id
+$monitor_left_sname = $json.monitor_left_sname
+$monitor_right_sname = $json.monitor_right_sname
+$tv_sname = $json.tv_sname
 #   
 
 $full_path = if (-not $PSScriptRoot) { [Environment]::GetCommandLineArgs()[0] } else { $PSScriptRoot + "\"+ $MyInvocation.MyCommand.Name}
@@ -60,55 +60,61 @@ $full_path = if (-not $PSScriptRoot) { [Environment]::GetCommandLineArgs()[0] } 
 # выводим изображение на мониторы
 if ($type -eq "win_on_monitor")
 {
-    [Environment]::SetEnvironmentVariable("WHERE_PICTURE", $type, 'User')
+    # [Environment]::SetEnvironmentVariable("WHERE_PICTURE", $type, 'User')
 
     Get-Process -processName  "*openvpn-gui*" | Stop-Process
     & $path_nircmd setdefaultsounddevice $name_pc_speaker 1
-    Start-Sleep -Milliseconds 200
+    # Start-Sleep -Milliseconds 200
     & $path_nircmd setdefaultsounddevice $name_pc_speaker 2
    
-    Start-Sleep -Milliseconds 200
-    & $path_mon /TurnOn $monitor_left_id
-    Start-Sleep -Milliseconds 200
-    & $path_mon /TurnOn $monitor_right_id
-    Start-Sleep -Milliseconds 200
-    & $path_mon /SetPrimary $monitor_right_id
-    & $path_mon /disable $tv_id
+    # Start-Sleep -Milliseconds 200
+    & $path_mon /TurnOn $monitor_left_sname
+    # Start-Sleep -Milliseconds 200
+    & $path_mon /TurnOn $monitor_right_sname
+    # Start-Sleep -Milliseconds 200
+    # & $path_mon /SetPrimary "Name=" + $monitor_right_sname
+    & $path_mon /SetMonitors "Name=$monitor_left_sname Width=1920 Height=1080 PositionX=0 PositionY=0 " "Name=$monitor_right_sname Width=1920 Height=1080 PositionX=0 PositionY=0 " 
+    & $path_mon /SetPrimary $monitor_right_sname
     Start-Sleep -Milliseconds 500
-    & $path_mon /MoveWindow Primary All
+    & $path_mon /disable $tv_sname
+    Start-Sleep -Milliseconds 500
+    & $path_mon /MoveWindow Primary All 
 }
 # выводим изображение на телевизор
 elseif ($type -eq "win_on_tv")
 {
 
-    [Environment]::SetEnvironmentVariable("WHERE_PICTURE", $type, 'User')
+    # [Environment]::SetEnvironmentVariable("WHERE_PICTURE", $type, 'User')
 
-    & $path_mon /enable $tv_id
-    Start-Sleep -Milliseconds 1000
-    & $path_mon /SetPrimary $tv_id
-    Start-Sleep -Milliseconds 1500
+    & $path_mon /enable $tv_sname
+    Start-Sleep -Milliseconds 500
+    & $path_mon /SetMonitors "Name=$tv_sname Width=3840 Height=2160 PositionX=0 PositionY=0" "Name=$monitor_left_sname Width=1920 Height=1080 PositionX=3840 PositionY=0 " "Name=$monitor_right_sname Width=1920 Height=1080 PositionX=5760 PositionY=0 " 
+    Start-Sleep -Milliseconds 500
+    & $path_mon /SetPrimary $tv_sname
+    Start-Sleep -Milliseconds 500
+    & $path_mon /MoveWindow Primary All 
+    Start-Sleep -Milliseconds 500
+    & $path_mon /TurnOff $monitor_left_sname
+    Start-Sleep -Milliseconds 50
+    & $path_mon /TurnOff $monitor_right_sname
+    # Start-Sleep -Milliseconds 500
 
-    & $path_mon /TurnOff $monitor_left_id
-    Start-Sleep -Milliseconds 500
-    & $path_mon /TurnOff $monitor_right_id
-    Start-Sleep -Milliseconds 500
-
-    & $path_mon /MoveWindow Primary All
-    Start-Sleep -Milliseconds 500
+    
+    # Start-Sleep -Milliseconds 500
     & $path_nircmd setdefaultsounddevice $name_receiver_speaker 1
     & $path_nircmd setdefaultsounddevice $name_receiver_speaker 2
 
     # Если параметр не равен "chrome", то останавливаем все процессы из массива
-    if (($par_check -ne "chrome") -and ($close_chrome -ne "1"))
-    {
-        $close_process | ForEach-Object {
-            if(Get-Process -processName  $_ -ErrorAction SilentlyContinue)
-            {
-                Get-Process -processName  $_ | Stop-Process
-            }
+    # if (($par_check -ne "chrome") -and ($close_chrome -ne "1"))
+    # {
+    #     $close_process | ForEach-Object {
+    #         if(Get-Process -processName  $_ -ErrorAction SilentlyContinue)
+    #         {
+    #             Get-Process -processName  $_ | Stop-Process
+    #         }
         
-        }
-    }
+    #     }
+    # }
 
     if ($par_check -eq "steam")
     {
@@ -156,16 +162,16 @@ elseif ($type -eq "set_volume")
 # выключаем мониторы
 elseif ($type -eq "off_monitors1")
 {
-    #& $path_mon /TurnOff $monitor_left_id
+    #& $path_mon /TurnOff $monitor_left_sname
     Start-Sleep -Milliseconds 500
-    & $path_mon /TurnOff $monitor_right_id
+    & $path_mon /TurnOff "Name=" + $monitor_right_sname
 }
 # включаем мониторы
 elseif ($type -eq "on_monitors")
 {
-    & $path_mon /enable $monitor_left_id
+    & $path_mon /enable "Name=" + $monitor_left_sname
     Start-Sleep -Milliseconds 500
-    & $path_mon /enable $monitor_right_id
+    & $path_mon /enable "Name=" + $monitor_right_sname
 }
 # выключаем ПК
 elseif ($type -eq "off_pc")
@@ -187,7 +193,7 @@ elseif ($type -eq "off_monitors3")
 {
     New-Item -Name 'file.txt' -Path 'D:\' 
     Start-Sleep -Milliseconds 500
-    & $path_mon /TurnOff $monitor_right_id
+    & $path_mon /TurnOff "Name=" + $monitor_right_sname
     New-Item -Name 'file1.txt' -Path 'D:\' 
 }
 

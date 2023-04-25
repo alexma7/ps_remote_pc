@@ -81,7 +81,7 @@ if ($type -eq "win_on_monitor")
     & $path_mon /TurnOn $monitor_right_sname
     # Start-Sleep -Milliseconds 200
     # & $path_mon /SetPrimary "Name=" + $monitor_right_sname
-    & $path_mon /SetMonitors "Name=$monitor_left_sname Width=1920 Height=1080 PositionX=0 PositionY=0 " "Name=$monitor_right_sname Width=1920 Height=1080 PositionX=0 PositionY=0 " 
+    & $path_mon /SetMonitors "Name=$monitor_left_sname Width=1920 Height=1080 PositionX=0 PositionY=0 " "Name=$monitor_right_sname Width=1920 Height=1080 PositionX=1920 PositionY=0 " 
     Start-Sleep -Milliseconds 100
     & $path_mon /SetPrimary $monitor_right_sname
     Start-Sleep -Milliseconds 500
@@ -100,7 +100,6 @@ elseif ($type -eq "win_on_tv")
     & $path_mon /SetMonitors "Name=$tv_sname Width=3840 Height=2160 PositionX=0 PositionY=0" "Name=$monitor_left_sname Width=1920 Height=1080 PositionX=3840 PositionY=0 " "Name=$monitor_right_sname Width=1920 Height=1080 PositionX=5760 PositionY=0 " 
     Start-Sleep -Milliseconds 500
     & $path_mon /SetPrimary $tv_sname
-    Save-Help
     Start-Sleep -Milliseconds 500
     & $path_mon /TurnOff $monitor_left_sname
     Start-Sleep -Milliseconds 50

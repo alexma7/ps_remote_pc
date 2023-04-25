@@ -2,6 +2,10 @@
     "path_hdd_dlna": "\\\\192.168.1.100\\g\\Films\\_look",
     "path_nircmd": "C:\\Program Files\\NirCmd\\nircmd.exe",
     "path_mon": "C:\\Program Files\\multimonitortool\\MultiMonitorTool.exe",
+    "path_ds4windows": "C:\\Program Files\\DS4Windows\\DS4Windows.exe",
+    "path_yuzu": "F:\\games\\nintendo\\Switch\\yuzu\\yuzu.exe",
+    "path_free_file_sync": "C:\\Program Files\\FreeFileSync\\FreeFileSync.exe",
+    "path_save_local_sync": "C:\\Users\\alexm\\OneDrive\\Документы\\FreeFileSync_settings\\save_local_sync.ffs_batch",
 
     "monitor_left_id": "MONITOR\\AOC2480\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0007",
     "monitor_right_id": "MONITOR\\GSM5AB8\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0013",
@@ -11,7 +15,7 @@
     "monitor_right_sname": "GSM5AB8",
     "tv_sname": "DON005A",
 
-    "name_pc_speaker": "Р”РёРЅР°РјРёРєРё",
+    "name_pc_speaker": "Динамики",
     "name_receiver_speaker": "DENON-AVAMP",
 
     "close_chrome": "0"

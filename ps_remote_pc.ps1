@@ -37,9 +37,17 @@ $json = Get-Content ( $path_to_script + '\ps_remote_pc.json')
 $json = $json -replace '(?m)(?<=^([^"]|"[^"]*")*)//.*' -replace '(?ms)/\*.*?\*/' 
 $json = $json | Out-String | ConvertFrom-Json
 
+
 # Переменные для работы  $json.path_to_logs
 $path_nircmd = $json.path_nircmd
 $path_mon = $json.path_mon
+$path_ds4windows = $json.path_ds4windows
+$path_yuzu = $json.path_yuzu
+
+# Переменные для бэкапа
+$path_free_file_sync = $json.path_free_file_sync
+$path_save_local_sync = $json.path_save_local_sync
+
 # $close_chrome = $json.close_chrome
 
 $name_pc_speaker = "Speakers"  # Если винда русская, то нужно писать Динамики
@@ -74,6 +82,7 @@ if ($type -eq "win_on_monitor")
     # Start-Sleep -Milliseconds 200
     # & $path_mon /SetPrimary "Name=" + $monitor_right_sname
     & $path_mon /SetMonitors "Name=$monitor_left_sname Width=1920 Height=1080 PositionX=0 PositionY=0 " "Name=$monitor_right_sname Width=1920 Height=1080 PositionX=0 PositionY=0 " 
+    Start-Sleep -Milliseconds 100
     & $path_mon /SetPrimary $monitor_right_sname
     Start-Sleep -Milliseconds 500
     & $path_mon /disable $tv_sname
@@ -91,12 +100,13 @@ elseif ($type -eq "win_on_tv")
     & $path_mon /SetMonitors "Name=$tv_sname Width=3840 Height=2160 PositionX=0 PositionY=0" "Name=$monitor_left_sname Width=1920 Height=1080 PositionX=3840 PositionY=0 " "Name=$monitor_right_sname Width=1920 Height=1080 PositionX=5760 PositionY=0 " 
     Start-Sleep -Milliseconds 500
     & $path_mon /SetPrimary $tv_sname
-    Start-Sleep -Milliseconds 500
-    & $path_mon /MoveWindow Primary All 
+    Save-Help
     Start-Sleep -Milliseconds 500
     & $path_mon /TurnOff $monitor_left_sname
     Start-Sleep -Milliseconds 50
     & $path_mon /TurnOff $monitor_right_sname
+    tart-Sleep -Milliseconds 500
+    & $path_mon /MoveWindow Primary All 
     # Start-Sleep -Milliseconds 500
 
     
@@ -201,6 +211,48 @@ elseif ($type -eq "off_monitors3")
 elseif ($type -eq "delete_file_dlna")
 {
     Get-ChildItem  $json.path_hdd_dlna  | Sort-Object name | Select-Object -first 1 | Remove-Item
+}
+
+
+# выводим изображение на мониторы
+if ($type -eq "yuzu")
+{
+    # Запустим DS4Windows
+    & $path_ds4windows
+    
+    # Запустим YUZU
+    if(-not(Get-Process -processName  "YUZU" -ErrorAction SilentlyContinue))
+    {
+        & $path_yuzu
+    }
+    
+}
+
+# выключение пк с переводом изображения и бэкапом сохранений на локальный диск
+if ($type -eq "turn_off_local_bak")
+{
+    # начнем бэкап сохранений
+    & $path_free_file_sync $path_save_local_sync
+
+    # переведем изображение на мониторы
+    & "C:\other\GIT\ps_remote_pc\ps_remote_pc.exe" win_on_monitor
+
+    # проверяем процесс FreeFileSync, если он открыт, то ждем, пока не закроется
+    Do {
+        $FFSbusy = Get-Process -Name FreeFileSync -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
+        If ($FFSbusy) {
+            Start-Sleep -Seconds 5
+            "Wait exit FreeFileSync..."
+        }
+    } Until (!$FFSbusy)
+    
+
+    # после бэкапа выключаем компьютер
+    # New-Item -ItemType "file" -Path "D:\test.txt" # для отладки
+    Stop-Computer
+    
+    
+    
 }
 
 

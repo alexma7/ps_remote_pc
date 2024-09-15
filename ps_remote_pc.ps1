@@ -17,10 +17,6 @@ if ( $par_val -lt 1.0)
     $par_val = [math]::Round([float]$par_val * 100, 0)
 }
 
-# запишем параметры в журнал 
-$date_begin = Get-Date -Format "dd/MM/yyyy HH:mm"
-$date_begin + ": type=" + $type + " par_val=" + $par_val + " par_check=" + $par_check  | Out-File C:\other\GIT\ps_remote_pc\logs.txt -append
-
 # Получим путь до файла, из exe файла не работает $PSScriptRoot
 $path_to_script = 
 	if (-not $PSScriptRoot) 
@@ -31,9 +27,19 @@ $path_to_script =
 	{
 		$PSScriptRoot 
 	}
+
+
+$path_to_script
+
+$path_to_log = $path_to_script + '\logs.txt'
+# запишем параметры в журнал 
+$date_begin = Get-Date -Format "dd/MM/yyyy HH:mm"
+$date_begin + ": type=" + $type + " par_val=" + $par_val + " par_check=" + $par_check  | Out-File $path_to_log -append
+
+
 $path_to_script
 # Получаем данные из JSON
-$json = Get-Content ( $path_to_script + '\ps_remote_pc.json')  
+$json = Get-Content ( $path_to_script + '\ps_remote_pc.jsonc')  
 $json = $json -replace '(?m)(?<=^([^"]|"[^"]*")*)//.*' -replace '(?ms)/\*.*?\*/' 
 $json = $json | Out-String | ConvertFrom-Json
 
@@ -45,8 +51,8 @@ $path_ds4windows = $json.path_ds4windows
 $path_yuzu = $json.path_yuzu
 
 # Переменные для бэкапа
-$path_free_file_sync = $json.path_free_file_sync
-$path_save_local_sync = $json.path_save_local_sync
+$path_to_exe_freefilesync = $json.path_to_exe_freefilesync
+$path_to_conf_freefilesync = $json.path_to_conf_freefilesync
 
 # $close_chrome = $json.close_chrome
 
@@ -69,7 +75,6 @@ $full_path = if (-not $PSScriptRoot) { [Environment]::GetCommandLineArgs()[0] } 
 if ($type -eq "win_on_monitor")
 {
     # [Environment]::SetEnvironmentVariable("WHERE_PICTURE", $type, 'User')
-
     Get-Process -processName  "*openvpn-gui*" | Stop-Process
     & $path_nircmd setdefaultsounddevice $name_pc_speaker 1
     # Start-Sleep -Milliseconds 200
@@ -81,7 +86,7 @@ if ($type -eq "win_on_monitor")
     & $path_mon /TurnOn $monitor_right_sname
     # Start-Sleep -Milliseconds 200
     # & $path_mon /SetPrimary "Name=" + $monitor_right_sname
-    & $path_mon /SetMonitors "Name=$monitor_left_sname Width=1920 Height=1080 PositionX=0 PositionY=0 " "Name=$monitor_right_sname Width=1920 Height=1080 PositionX=1920 PositionY=0 " 
+    & $path_mon /SetMonitors "Name=$monitor_left_sname Width=1920 Height=1080 PositionX=0 PositionY=0 " "Name=$monitor_right_sname Width=3440 Height=1440 PositionX=1920 PositionY=0 " 
     Start-Sleep -Milliseconds 100
     & $path_mon /SetPrimary $monitor_right_sname
     Start-Sleep -Milliseconds 500
@@ -230,11 +235,16 @@ if ($type -eq "yuzu")
 # выключение пк с переводом изображения и бэкапом сохранений на локальный диск
 if ($type -eq "turn_off_local_bak")
 {
-    # начнем бэкап сохранений
-    & $path_free_file_sync $path_save_local_sync
+    # начнем запускать файлы бэкапов
+    $path_to_conf_freefilesync | ForEach-Object {
+        & $path_to_exe_freefilesync $_
+    }
+    
 
+
+    $path_to_script = $path_to_script + "\ps_remote_pc.exe"
     # переведем изображение на мониторы
-    & "C:\other\GIT\ps_remote_pc\ps_remote_pc.exe" win_on_monitor
+    & $path_to_script win_on_monitor
 
     # проверяем процесс FreeFileSync, если он открыт, то ждем, пока не закроется
     Do {
@@ -247,7 +257,11 @@ if ($type -eq "turn_off_local_bak")
     
 
     # после бэкапа выключаем компьютер
-    # New-Item -ItemType "file" -Path "D:\test.txt" # для отладки
+
+    # $sCurrDate = Get-Date -Format 'yyyy_MM_dd_HH_mm_ss'
+    # $pp = "D:\test"+$sCurrDate+".txt"
+    # $pp
+    # New-Item -ItemType "file" -Path $pp # для отладки
     Stop-Computer
     
     

@@ -4,8 +4,8 @@
 Для управления звуком надо запустить в PowerShell от админа Install-Module -Name AudioDeviceCmdlets  https://github.com/frgnca/AudioDeviceCmdlets
 
 Для работы нужны программы nircmd и MultiMonitorTool их кидаем в папки соответственно:
-- C:\Program Files\NirCmd\nircmd.exe
-- C:\Program Files\multimonitortool\MultiMonitorTool.exe
+- C:\Program Files\NirCmd\nircmd.exe https://www.nirsoft.net/utils/nircmd.html
+- C:\Program Files\multimonitortool\MultiMonitorTool.exe   https://www.nirsoft.net/utils/multi_monitor_tool.html
 
 В программе используется 3 параметра:
  ## $type  

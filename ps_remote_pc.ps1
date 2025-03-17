@@ -86,7 +86,7 @@ if ($type -eq "win_on_monitor")
     & $path_mon /TurnOn $monitor_right_sname
     # Start-Sleep -Milliseconds 200
     # & $path_mon /SetPrimary "Name=" + $monitor_right_sname
-    & $path_mon /SetMonitors "Name=$monitor_left_sname Width=1920 Height=1080 PositionX=0 PositionY=0 " "Name=$monitor_right_sname Width=3440 Height=1440 PositionX=1920 PositionY=0 " 
+    & $path_mon /SetMonitors "Name=$monitor_left_sname Width=1920 Height=1080 PositionX=0 PositionY=162 " "Name=$monitor_right_sname Width=3440 Height=1440 PositionX=1920 PositionY=0 " 
     Start-Sleep -Milliseconds 100
     & $path_mon /SetPrimary $monitor_right_sname
     Start-Sleep -Milliseconds 500
